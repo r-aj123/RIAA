@@ -107,7 +107,7 @@ In a competitive online retail environment, understanding customer behavior is c
 
 ### 📂 data
 Stores all datasets used in the project.  
-- **OnlineRetail.csv** – the raw dataset for analysis.
+- **OnlineRetail.xlsx** – the raw dataset for analysis.
 
 ### 📂 notebooks
 Contains Jupyter notebooks for each main step of the workflow.  
