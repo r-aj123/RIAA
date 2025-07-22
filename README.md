@@ -1,1 +1,103 @@
-# RIAA
+# 🛍️ Customer Purchase & Churn Analysis
+
+This project aims to analyze customer purchasing behavior and predict potential churn using transactional data from an online retail business. The analysis is conducted using the **Online Retail Dataset** from the UCI Machine Learning Repository.
+
+---
+
+## 📌 Problem Statement
+
+In a competitive online retail environment, understanding customer behavior is crucial for retention and growth. This project explores historical purchase data to:
+
+- Analyze customer purchase frequency, recency, and monetary value.
+- Identify patterns of customer churn.
+- Segment customers using RFM (Recency, Frequency, Monetary) analysis.
+- Build predictive models to detect churn-risk customers.
+
+---
+
+## 📊 Dataset Information
+
+- **Source**: [UCI Machine Learning Repository – Online Retail](https://archive.ics.uci.edu/ml/datasets/online+retail)
+- **Time Period**: December 2010 to December 2011
+- **Data Size**: ~540,000 rows
+- **Attributes**:
+  - `InvoiceNo`: Invoice number (unique identifier for each transaction)
+  - `StockCode`: Product/item code
+  - `Description`: Product description
+  - `Quantity`: Number of items purchased
+  - `InvoiceDate`: Date and time of the transaction
+  - `UnitPrice`: Price per unit (in GBP)
+  - `CustomerID`: Unique ID for each customer
+  - `Country`: Customer’s location
+
+---
+
+## 🧠 Project Workflow
+
+### 1. Data Preprocessing
+- Handle missing values (`CustomerID`, `Description`)
+- Remove canceled orders (invoices starting with 'C')
+- Convert data types
+- Feature engineering (e.g., TotalPrice = Quantity × UnitPrice)
+
+### 2. Exploratory Data Analysis (EDA)
+- Customer distribution by country
+- Purchase trends over time
+- Top-selling products
+- Revenue analysis
+
+### 3. RFM Analysis
+- Recency: Days since last purchase
+- Frequency: Number of transactions
+- Monetary: Total spending
+- Customer segmentation based on RFM scores
+
+### 4. Churn Definition & Labeling
+- Define churn as no purchase in the last X days
+- Label customers as "Churned" or "Active"
+
+### 5. Churn Prediction Modeling
+- Data splitting (Train/Test)
+- Feature selection
+- Modeling with:
+  - Logistic Regression
+  - Random Forest
+  - XGBoost
+- Evaluation using Accuracy, Precision, Recall, F1-score, ROC-AUC
+
+### 6. Insights & Recommendations
+- Top churn indicators
+- Customer segments at high risk
+- Strategies for retention
+
+---
+
+## 🛠️ Technologies Used
+
+- **Language**: Python 3.x
+- **Libraries**:
+  - `pandas`, `numpy`
+  - `matplotlib`, `seaborn`, `plotly`
+  - `scikit-learn`
+  - `xgboost`
+  - `datetime`
+
+---
+
+## 📁 Project Structure
+
+```bash
+├── data/
+│   └── OnlineRetail.csv
+├── notebooks/
+│   └── 01_EDA.ipynb
+│   └── 02_RFM_Analysis.ipynb
+│   └── 03_Churn_Modeling.ipynb
+├── src/
+│   └── preprocessing.py
+│   └── modeling.py
+├── output/
+│   └── visualizations/
+│   └── models/
+├── README.md
+└── requirements.txt
