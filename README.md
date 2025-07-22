@@ -102,6 +102,8 @@ In a competitive online retail environment, understanding customer behavior is c
 ├── README.md
 └── requirements.txt
 
+---
+
 ### 📖 Folder and File Details
 
 - **data/**  
@@ -129,5 +131,4 @@ In a competitive online retail environment, understanding customer behavior is c
 
 - **requirements.txt**  
   Lists Python dependencies required to run the project.
-
 
