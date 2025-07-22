@@ -88,7 +88,7 @@ In a competitive online retail environment, understanding customer behavior is c
 
 ```bash
 ├── data/
-│   └── OnlineRetail.csv
+│   └── OnlineRetail.xlsx
 ├── notebooks/
 │   └── 01_EDA.ipynb
 │   └── 02_RFM_Analysis.ipynb
