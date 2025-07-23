@@ -2,11 +2,12 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 import pandas as pd
 import plotly.express as px
+from sklearn.model_selection import train_test_split
 
 # Load dataset (modify the path if required)
 @st.cache_data
 def load_data():
-    df = pd.read_excel(r'C:\Users\kraja\OneDrive\Desktop\RIAA-1\data\cleaned_dataset.xlsx')  # adjust this as needed
+    df = pd.read_excel(r'C:\Users\atuls\OneDrive\Desktop\RIAA-2\data\cleaned_dataset.xlsx')  # adjust this as needed
     return df
 
 dataset = load_data()
@@ -28,14 +29,14 @@ if selected == "EDA Dashboard":
     st.title("📊 Exploratory Data Analysis")
 
     st.subheader("Top 10 Countries by Revenue")
-    dataset['TotalAmount'] = dataset['Quantity'] * dataset['UnitPrice']
-    country_rev = dataset.groupby('Country')['TotalAmount'].sum().sort_values(ascending=False).head(10)
+    dataset['Total_amount'] = dataset['Quantity'] * dataset['UnitPrice']
+    country_rev = dataset.groupby('Country')['Total_amount'].sum().sort_values(ascending=False).head(10)
     st.plotly_chart(px.bar(country_rev, x=country_rev.index, y=country_rev.values, title="Revenue by Country"))
 
     st.subheader("Monthly Revenue Trend")
     dataset['InvoiceDate'] = pd.to_datetime(dataset['InvoiceDate'])
     dataset['Month'] = dataset['InvoiceDate'].dt.to_period('M')
-    monthly_rev = dataset.groupby('Month')['TotalAmount'].sum()
+    monthly_rev = dataset.groupby('Month')['Total_amount'].sum()
     st.line_chart(monthly_rev)
 
 # 2️⃣ RFM ANALYSIS
@@ -43,12 +44,11 @@ elif selected == "RFM Analysis":
     st.title("📈 RFM Analysis")
 
     import datetime as dt
-
     snapshot_date = dataset['InvoiceDate'].max() + dt.timedelta(days=1)
     rfm = dataset.groupby('CustomerID').agg({
         'InvoiceDate': lambda x: (snapshot_date - x.max()).days,
         'InvoiceNo': 'nunique',
-        'TotalAmount': 'sum'
+        'Total_amount': 'sum'
     })
     rfm.columns = ['Recency', 'Frequency', 'Monetary']
     st.dataframe(rfm.head())
@@ -64,24 +64,42 @@ elif selected == "RFM Analysis":
 elif selected == "Churn Modeling":
     st.title("🔍 Customer Churn Prediction")
 
+    # 👉 Load the same RFM dataset you used in the notebook
+    rfm_data = pd.read_excel(r"C:\Users\atuls\OneDrive\Desktop\RIAA-2\data\RFM.xlsx")
+
+    # 👉 Apply the same churn definition
+    Churn_period = 180
+    rfm_data['Churned'] = (rfm_data['Recency'] > Churn_period).astype('int64')
+
+    # 👉 Prepare features and target
+    X = rfm_data[['Recency', 'Frequency', 'Monetary']]
+    y = rfm_data['Churned']
+
+    # 👉 Split the data like in the notebook
+    from sklearn.model_selection import train_test_split
+    x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=43)
+
+    # 👉 Train the same logistic regression model
+    from sklearn.linear_model import LogisticRegression
+    classification_model = LogisticRegression(
+        class_weight='balanced',
+        C=100,
+        solver='liblinear'
+    )
+    classification_model.fit(x_train, y_train)
+
+    # 👉 Input sliders
     st.subheader("Enter RFM Values:")
     rec = st.slider("Recency", min_value=0, max_value=365, value=30)
     freq = st.slider("Frequency", min_value=0, max_value=100, value=5)
     mon = st.slider("Monetary", min_value=0, max_value=10000, value=500)
 
-    # Dummy Logistic Regression (replace with real model later)
-    import numpy as np
-    from sklearn.linear_model import LogisticRegression
-
-    # Train a simple model for demonstration
-    rfm['Churned'] = np.where(rfm['RFM_Score'] <= 6, 1, 0)
-    X = rfm[['Recency', 'Frequency', 'Monetary']]
-    y = rfm['Churned']
-    model = LogisticRegression()
-    model.fit(X, y)
-
-    # Predict churn
-    input_data = pd.DataFrame([[rec, freq, mon]], columns=['Recency', 'Frequency', 'Monetary'])
-    prediction = model.predict(input_data)[0]
-    result = "Churned" if prediction == 1 else "Not Churned"
-    st.success(f"Prediction: **{result}**")
+    # 👉 Predict button
+    if st.button("Predict"):
+        input_data = pd.DataFrame(
+            [[rec, freq, mon]],
+            columns=['Recency', 'Frequency', 'Monetary']
+        )
+        prediction = classification_model.predict(input_data)[0]
+        result = "Churned" if prediction == 1 else "Not Churned"
+        st.success(f"✅ Prediction: **{result}**")
