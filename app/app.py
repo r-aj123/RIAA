@@ -67,26 +67,27 @@ elif selected == "Churn Modeling":
     # 👉 Load the same RFM dataset you used in the notebook
     rfm_data = pd.read_excel(r"C:\Users\atuls\OneDrive\Desktop\RIAA-2\data\RFM.xlsx")
 
+
     # 👉 Apply the same churn definition
-    Churn_period = 180
-    rfm_data['Churned'] = (rfm_data['Recency'] > Churn_period).astype('int64')
+Churn_period = 180
+rfm_data['Churned'] = (rfm_data['Recency'] > Churn_period).astype('int64')
 
-    # 👉 Prepare features and target
-    X = rfm_data[['Recency', 'Frequency', 'Monetary']]
-    y = rfm_data['Churned']
+# 👉 Prepare features and target
+X = rfm_data[['Recency', 'Frequency', 'Monetary']]
+y = rfm_data['Churned']
 
-    # 👉 Split the data like in the notebook
-    from sklearn.model_selection import train_test_split
-    x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=43)
+# 👉 Split the data like in the notebook
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=43)
 
-    # 👉 Train the same logistic regression model
-    from sklearn.linear_model import LogisticRegression
-    classification_model = LogisticRegression(
-        class_weight='balanced',
-        C=100,
-        solver='liblinear'
+# 👉 Train the same logistic regression model
+from sklearn.linear_model import LogisticRegression
+classification_model = LogisticRegression(
+    class_weight='balanced',
+    C=100,
+    solver='liblinear'
     )
-    classification_model.fit(x_train, y_train)
+classification_model.fit(x_train, y_train)
 
 st.subheader("Enter RFM Values:")
 
@@ -113,3 +114,40 @@ if st.button("Predict"):
     prediction = classification_model.predict(input_data)[0]
     result = "Churned" if prediction == 1 else "Not Churned"
     st.success(f"✅ Prediction: **{result}**")
+
+# 👉 Apply the same churn definition
+Churn_period = 180
+rfm_data['Churned'] = (rfm_data['Recency'] > Churn_period).astype('int64')
+
+# 👉 Prepare features and target
+X = rfm_data[['Recency', 'Frequency', 'Monetary']]
+y = rfm_data['Churned']
+
+# 👉 Split the data like in the notebook
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=43)
+
+# 👉 Train the same logistic regression model
+from sklearn.linear_model import LogisticRegression
+classification_model = LogisticRegression(
+class_weight='balanced',
+C=100,
+solver='liblinear'
+)
+classification_model.fit(x_train, y_train)
+
+# 👉 Input sliders
+st.subheader("Enter RFM Values:")
+rec = st.slider("Recency", min_value=0, max_value=365, value=30)
+freq = st.slider("Frequency", min_value=0, max_value=100, value=5)
+mon = st.slider("Monetary", min_value=0, max_value=10000, value=500)
+
+# 👉 Predict button
+if st.button("Predict"):
+    input_data = pd.DataFrame(
+    [[rec, freq, mon]],
+    columns=['Recency', 'Frequency', 'Monetary']
+)
+prediction = classification_model.predict(input_data)[0]
+result = "Churned" if prediction == 1 else "Not Churned"
+st.success(f"✅ Prediction: **{result}**")
