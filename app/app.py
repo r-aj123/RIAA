@@ -1,17 +1,17 @@
 import streamlit as st
+import os
 from streamlit_option_menu import option_menu
 import pandas as pd
 import plotly.express as px
 from sklearn.model_selection import train_test_split
 
 # Load dataset (modify the path if required)
-@st.cache_data
 def load_data():
-    df = pd.read_excel(r'C:\Users\atuls\OneDrive\Desktop\RIAA-2\data\cleaned_dataset.xlsx')  # adjust this as needed
-    return df
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(base_dir, "..", "data", "cleaned_dataset.xlsx")
+    return pd.read_excel(data_path)
 
 dataset = load_data()
-
 # Navbar
 st.set_page_config(page_title="Customer Analysis", layout="wide")
 
@@ -60,57 +60,45 @@ elif selected == "RFM Analysis":
     rfm['RFM_Score'] = rfm[['R_Score', 'F_Score', 'M_Score']].sum(axis=1).astype(int)
     st.dataframe(rfm[['Recency', 'Frequency', 'Monetary', 'RFM_Score']].head())
 
+
 # 3️⃣ CHURN MODELING
 elif selected == "Churn Modeling":
     st.title("🔍 Customer Churn Prediction")
 
-    # 👉 Load the same RFM dataset you used in the notebook
-    rfm_data = pd.read_excel(r"C:\Users\atuls\OneDrive\Desktop\RIAA-2\data\RFM.xlsx")
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    rfm_path = os.path.join(base_dir, "..", "data", "RFM.xlsx")
+    rfm_data = pd.read_excel(rfm_path)
 
+    Churn_period = 180
+    rfm_data['Churned'] = (rfm_data['Recency'] > Churn_period).astype('int64')
 
-    # 👉 Apply the same churn definition
-Churn_period = 180
-rfm_data['Churned'] = (rfm_data['Recency'] > Churn_period).astype('int64')
+    X = rfm_data[['Recency', 'Frequency', 'Monetary']]
+    y = rfm_data['Churned']
 
-# 👉 Prepare features and target
-X = rfm_data[['Recency', 'Frequency', 'Monetary']]
-y = rfm_data['Churned']
+    from sklearn.model_selection import train_test_split
+    x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=43)
 
-# 👉 Split the data like in the notebook
-from sklearn.model_selection import train_test_split
-x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=43)
-
-# 👉 Train the same logistic regression model
-from sklearn.linear_model import LogisticRegression
-classification_model = LogisticRegression(
-    class_weight='balanced',
-    C=100,
-    solver='liblinear'
+    from sklearn.linear_model import LogisticRegression
+    classification_model = LogisticRegression(
+        class_weight='balanced',
+        C=100,
+        solver='liblinear'
     )
-classification_model.fit(x_train, y_train)
+    classification_model.fit(x_train, y_train)
 
-st.subheader("Enter RFM Values:")
+    st.subheader("Enter RFM Values:")
 
-# 🔹 Recency
-rec_slider = st.slider("Recency (days since last purchase)", min_value=0, max_value=365, value=30)
-rec = st.number_input("Enter Recency value:", min_value=0, max_value=365, value=rec_slider, step=1)
+    rec_slider = st.slider("Recency (days since last purchase)", min_value=0, max_value=365, value=30)
+    rec = st.number_input("Enter Recency value:", min_value=0, max_value=365, value=rec_slider, step=1)
 
-# 🔹 Frequency
-freq_slider = st.slider("Frequency (number of purchases)", min_value=0, max_value=100, value=5)
-freq = st.number_input("Enter Frequency value:", min_value=0, max_value=100, value=freq_slider, step=1)
+    freq_slider = st.slider("Frequency (number of purchases)", min_value=0, max_value=100, value=5)
+    freq = st.number_input("Enter Frequency value:", min_value=0, max_value=100, value=freq_slider, step=1)
 
+    mon_slider = st.slider("Monetary (amount spent)", min_value=0, max_value=10000, value=500)
+    mon = st.number_input("Enter Monetary value:", min_value=0, max_value=10000, value=mon_slider, step=1)
 
-# 🔹 Monetary
-mon_slider = st.slider("Monetary (amount spent)", min_value=0, max_value=10000, value=500)
-mon = st.number_input("Enter Monetary value:", min_value=0, max_value=10000, value=mon_slider, step=1)
-
-
-    # 👉 Predict button
-if st.button("Predict"):
-    input_data = pd.DataFrame(
-        [[rec, freq, mon]],
-            columns=['Recency', 'Frequency', 'Monetary']
-    )
-    prediction = classification_model.predict(input_data)[0]
-    result = "Churned" if prediction == 1 else "Not Churned"
-    st.success(f"✅ Prediction: **{result}**")
+    if st.button("Predict"):
+        input_data = pd.DataFrame([[rec, freq, mon]], columns=['Recency', 'Frequency', 'Monetary'])
+        prediction = classification_model.predict(input_data)[0]
+        result = "Churned" if prediction == 1 else "Not Churned"
+        st.success(f"✅ Prediction: **{result}**")
