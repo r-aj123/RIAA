@@ -88,18 +88,28 @@ elif selected == "Churn Modeling":
     )
     classification_model.fit(x_train, y_train)
 
-    # 👉 Input sliders
-    st.subheader("Enter RFM Values:")
-    rec = st.slider("Recency", min_value=0, max_value=365, value=30)
-    freq = st.slider("Frequency", min_value=0, max_value=100, value=5)
-    mon = st.slider("Monetary", min_value=0, max_value=10000, value=500)
+st.subheader("Enter RFM Values:")
+
+# 🔹 Recency
+rec_slider = st.slider("Recency (days since last purchase)", min_value=0, max_value=365, value=30)
+rec = st.number_input("Enter Recency value:", min_value=0, max_value=365, value=rec_slider, step=1)
+
+# 🔹 Frequency
+freq_slider = st.slider("Frequency (number of purchases)", min_value=0, max_value=100, value=5)
+freq = st.number_input("Enter Frequency value:", min_value=0, max_value=100, value=freq_slider, step=1)
+
+
+# 🔹 Monetary
+mon_slider = st.slider("Monetary (amount spent)", min_value=0, max_value=10000, value=500)
+mon = st.number_input("Enter Monetary value:", min_value=0, max_value=10000, value=mon_slider, step=1)
+
 
     # 👉 Predict button
-    if st.button("Predict"):
-        input_data = pd.DataFrame(
-            [[rec, freq, mon]],
+if st.button("Predict"):
+    input_data = pd.DataFrame(
+        [[rec, freq, mon]],
             columns=['Recency', 'Frequency', 'Monetary']
-        )
-        prediction = classification_model.predict(input_data)[0]
-        result = "Churned" if prediction == 1 else "Not Churned"
-        st.success(f"✅ Prediction: **{result}**")
+    )
+    prediction = classification_model.predict(input_data)[0]
+    result = "Churned" if prediction == 1 else "Not Churned"
+    st.success(f"✅ Prediction: **{result}**")
